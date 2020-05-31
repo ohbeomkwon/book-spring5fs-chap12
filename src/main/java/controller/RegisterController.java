@@ -2,6 +2,7 @@ package controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,12 +41,18 @@ public class RegisterController {
 	}
 	
 	@PostMapping("/register/step3")
-	public String handlerStep3(RegisterRequest regReq) {
+	public String handlerStep3(RegisterRequest regReq, Errors errors) {	//커맨드객체(regReq)와 errors객체를 연결할 수 있다.
 //		@ModelAttribute("formData") 어노테이션을 통해서 RegisterRequest 객체가 받는 model의 이름을 변경할 수 있다.
+		new RegisterRequestValidator().validate(regReq, errors);
+//		위 코드를 통해서 RegisterRequest 커맨드 객체의 값이 올바른지 검사하고 그 결과를 Errors객체에 담는다.
+		if(errors.hasErrors()) {
+			return "register/step2";
+		}
 		try {
 			memberRegisterService.regist(regReq);
 			return "register/step3";
 		} catch (DuplicateMemberException e) {
+			errors.rejectValue("email", "duplicate");
 			return "register/step2";
 		}
 	}
