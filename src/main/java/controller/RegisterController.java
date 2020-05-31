@@ -1,9 +1,14 @@
 package controller;
 
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,10 +46,13 @@ public class RegisterController {
 	}
 	
 	@PostMapping("/register/step3")
-	public String handlerStep3(RegisterRequest regReq, Errors errors) {	//커맨드객체(regReq)와 errors객체를 연결할 수 있다.
-//		@ModelAttribute("formData") 어노테이션을 통해서 RegisterRequest 객체가 받는 model의 이름을 변경할 수 있다.
-		new RegisterRequestValidator().validate(regReq, errors);
+	public String handlerStep3(@ModelAttribute("registerRequest") @Valid RegisterRequest regReq, Errors errors) {	//커맨드객체(regReq)와 errors객체를 연결할 수 있다.
+		// @Valid 어노테이션을 통해서 global validator를 적용시킬 수 있다.
+		/*
+		new RegisterRequestValidator().validate(regReq, errors);		// local validator로 지정하는 방법
 //		위 코드를 통해서 RegisterRequest 커맨드 객체의 값이 올바른지 검사하고 그 결과를 Errors객체에 담는다.
+		 */
+		
 		if(errors.hasErrors()) {
 			return "register/step2";
 		}
@@ -56,5 +64,12 @@ public class RegisterController {
 			return "register/step2";
 		}
 	}
+	/*
+	@InitBinder
+	protected void initBinder(WebDataBinder binder) {
+		binder.setValidator(new RegisterRequestValidator());
+//		어떤 Validator가 커맨드 객체를 검증할지를 정한다. 지금은 한개의 Valiidator가 있지만 여러개가 존재하게되면 
+	}
+	*/
 	
 }
